@@ -2,17 +2,19 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
+  <meta name="slop-build" content="50-pages-new-2026-10-31">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1d1d19">
   <meta name="description" content="A three-word idea generator by dev_lotty.">
   <link rel="canonical" href="https://dev-lotty.github.io/slop/">
-  <title>slop generator 9003.56</title>
+  <title>slop generator 9003.57</title>
   <script>
+
     try {
       const saved = JSON.parse(localStorage.getItem('slop:handmade:v1'));
       document.documentElement.dataset.theme = saved?.appearanceVersion === 2 && saved.cfg?.light === true ? 'light' : 'dark';
     } catch { document.documentElement.dataset.theme = 'dark'; }
-  </script>
+</script>
   <style>
     :root {
       color-scheme: dark;
@@ -101,7 +103,6 @@
     .counter b.bump { animation: count 280ms; }
     .section-header { display: flex; align-items: baseline; justify-content: space-between; gap: 15px; margin-bottom: 5px; }
     h2 { margin: 0; font: 400 33px/1.15 var(--serif); letter-spacing: -.04em; }
-    .section-note { margin: 8px 0 26px; color: var(--muted); font-size: 11px; }
     .history { list-style: none; padding: 0; margin: 0; }
     .history li { border-bottom: 1px solid var(--line); }
     .history-copy { display: flex; align-items: baseline; gap: 15px; width: 100%; text-align: left; padding: 16px 0; }
@@ -165,11 +166,14 @@
     .warning-bar svg { width: 15px; height: 15px; }
     .warning-bar .close { margin-left: auto; color: #f4d7d2; border-color: #92554d; }
     .warning-content { position: relative; z-index: 1; padding: 30px 25px 24px; background: #150e0d; }
-    .warning-title { font: 400 clamp(28px, 7vw, 39px)/1.15 var(--serif); letter-spacing: -.025em; margin-bottom: 30px; }
+    .warning-title { font: 400 clamp(28px, 7vw, 39px)/1.15 var(--serif); letter-spacing: -.025em; min-height: 2.3em; margin-bottom: 18px; }
     .warning-actions { display: flex; justify-content: space-between; gap: 15px; }
     .warning-actions button { min-height: 40px; padding: 8px 17px; border: 1px solid #92554d; border-radius: 2px; background: #231311; color: #f4d7d2; font-size: 12px; }
     .warning-actions .warning-yes { background: #b73c30; color: #fff; border-color: #f18b7c; }
     .warning-actions button:hover { border-color: #ffb4a6; }
+    .warning-arena { display: block; position: relative; height: clamp(120px, 25svh, 176px); }
+    .warning-arena button { position: absolute; top: 0; left: 0; width: 72px; height: 44px; min-height: 44px; padding: 8px; transition: transform 180ms cubic-bezier(.2,.75,.25,1), border-color 120ms; will-change: transform; }
+    .warning-arena[data-still="true"] button { transition: none; }
     .warning-step { margin-left: auto; font-variant-numeric: tabular-nums; color: #c89d96; }
     .warning-ghosts { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
     .warning-ghost { position: absolute; inset: 0; border: 1px solid #a1473d; background: #1c0e0c; transform: translate(var(--gx), var(--gy)) rotate(var(--gr)); opacity: var(--go); }
@@ -192,13 +196,6 @@
     .debug-data dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
     .debug-log { max-height: 140px; overflow: auto; padding: 12px; border: 1px solid var(--line); border-radius: 3px; font: 10px/1.7 var(--mono); white-space: pre-wrap; background: var(--paper); }
     .debug-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px; }
-    .debug-note, .setup-details { color: var(--muted); font-size: 10px; }
-    .debug-note { margin: 12px 0 0; }
-    .setup-details { margin: 12px 0; }
-    .setup-details summary { color: var(--ink); cursor: pointer; }
-    .setup-details ol { padding-left: 20px; }
-    .setup-details li { margin: 8px 0; }
-    .setup-details code { overflow-wrap: anywhere; color: var(--ink); }
     @keyframes warning-shift { from { opacity: .65; transform: translate(-5px, 3px); } to { opacity: 1; transform: none; } }
     .landed { animation: land 300ms; }
     .spark { position: fixed; z-index: 25; width: 4px; height: 7px; border-radius: 1px; pointer-events: none; background: var(--accent); animation: fleck 550ms cubic-bezier(.1,.7,.3,1) forwards; }
@@ -238,6 +235,13 @@
       .tabs { gap: 17px; }
       .keyboard-hint { display: none; }
     }
+    @media (max-height: 560px) {
+      #warning-dialog { overflow: auto; }
+      .warning-bar { position: sticky; top: 0; }
+      .warning-content { padding-block: 18px; }
+      .warning-title { font-size: 28px; min-height: 0; margin-bottom: 16px; }
+      .warning-arena { height: 120px; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
@@ -246,7 +250,7 @@
 <body>
   <main class="wrap">
     <header>
-      <div class="heading"><h1>slop generator<span class="version">9003.56</span></h1></div>
+      <div class="heading"><h1>slop generator<span class="version">9003.57</span></h1></div>
     </header>
 
     <div class="nav-row">
@@ -284,14 +288,12 @@
 
     <section id="panel-ideas" role="tabpanel" aria-labelledby="tab-ideas" tabindex="0" hidden>
       <div class="section-header"><h2>Ideas</h2><button type="button" class="text-button" id="clear">Clear</button></div>
-      <p class="section-note">Last 50. Select to copy.</p>
       <ol class="history" id="history" aria-label="Generated ideas"></ol>
       <div class="empty" id="empty"><p>No ideas yet.</p><button type="button" class="text-button" id="first-spin">Spin ↗</button></div>
     </section>
 
     <section id="panel-words" role="tabpanel" aria-labelledby="tab-words" tabindex="0" hidden>
       <h2>Words</h2>
-      <p class="section-note">One per line. Saved automatically.</p>
       <div id="word-fields"></div>
       <button type="button" class="text-button" id="reset-words">Reset</button>
     </section>
@@ -339,7 +341,7 @@
     <div class="warning-bar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3v.2"/></svg><span id="warning-bar-label">WARNING</span><span class="warning-step" id="warning-step"></span><button type="button" class="close" id="close-warning" aria-label="Close warning">×</button></div>
     <div class="warning-content" id="warning-content">
       <h2 class="warning-title" id="warning-title" aria-live="polite" aria-atomic="true">Are you sure?</h2>
-      <div class="warning-actions" id="warning-questions"><button type="button" id="warning-cancel">Cancel</button><button type="button" class="warning-yes" id="warning-next">Yes</button></div>
+      <div class="warning-actions warning-arena" id="warning-questions"><button type="button" id="warning-cancel">No</button><button type="button" class="warning-yes" id="warning-next">Yes</button></div>
       <form id="debug-login" method="dialog" autocomplete="off" hidden>
         <label class="login-field" for="debug-user">Login<input id="debug-user" name="debug-user" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" required maxlength="80"></label>
         <label class="login-field" for="debug-password">Password<input id="debug-password" name="debug-password" type="password" autocomplete="off" required maxlength="80"></label>
@@ -360,18 +362,15 @@
     <div class="debug-tools"><button type="button" class="text-button" id="refresh-visitors">Refresh visits</button><button type="button" class="text-button" id="test-sound">Test sound</button><a class="text-button" id="analytics-link" href="https://www.goatcounter.com/" target="_blank" rel="noopener noreferrer" hidden>Analytics ↗</a></div>
     <dl class="debug-data" id="debug-data"></dl>
     <pre class="debug-log" id="debug-log" aria-label="Recent debug events"></pre>
-    <details class="setup-details" id="visitor-setup"><summary>Visitor counter setup</summary><ol><li>Create a <a href="https://www.goatcounter.com/signup" target="_blank" rel="noopener noreferrer">GoatCounter account</a> for this site.</li><li>Paste your public <code>https://your-name.goatcounter.com</code> address into <code>ANALYTICS_SITE</code> near the top of the HTML’s main script.</li><li>In GoatCounter settings, enable <strong>Allow adding visitor counts on your website</strong>. The full dashboard can remain private.</li><li>Upload the HTML as <code>index.html</code> in your GitHub repository.</li></ol><p>The total is public data and can be cached for up to four hours. It is not a permanent count of distinct people.</p></details>
     <div class="debug-footer"><button type="button" class="text-button" id="clear-log">Clear log</button><button type="button" class="text-button" id="lock-debug">Log out</button></div>
-    <p class="debug-note">Easter-egg login, not secure authentication. No private data is stored here.</p>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <script>
     (() => {
       'use strict';
-      // VISITOR SETUP: paste your public GoatCounter address here, then upload this file.
-      // Example: 'https://your-account.goatcounter.com'. Never put an API key/password here.
-      const ANALYTICS_SITE = '';
+
+      const ANALYTICS_SITE = 'https://lotteh.goatcounter.com';
       const SITE_URL = 'https://dev-lotty.github.io/slop/';
       const $ = id => document.getElementById(id);
       const BASE = [
@@ -407,7 +406,7 @@
           return clean.length ? clean : fallback.slice();
         });
       }
-      // Import the old page once. Its original storage keys are left untouched.
+
       const saved = read(KEY) || { words: read('sw'), ideas: read('si'), total: read('sn'), cfg: read('scfg'), current: read('scur') };
       let words = validWords(saved.words);
       let total = Number.isSafeInteger(saved.total) && saved.total >= 0 ? saved.total : 0;
@@ -425,7 +424,7 @@
         };
       }
       let cfg = cleanConfig(saved.cfg);
-      // Apply the requested dark default once, without losing words/history or later theme choices.
+
       if (saved.appearanceVersion !== 2) cfg.light = false;
       const held = [false, false, false];
       let busy = false, activeTab = 'spin', popupTimer, toastTimer, slipText = '';
@@ -450,7 +449,6 @@
         element.classList.add(name);
       }
 
-      // Small, soft mechanical sounds. One tick stream, not three competing ones.
       let context, master, noiseBuffer, lastTick = 0;
       function audio() {
         if (!cfg.sound || !cfg.vol) return null;
@@ -503,7 +501,7 @@
           if (name === 'copy') { note(740, .07, .08); note(988, .1, .07, .045); }
           if (name === 'hold') { tap(.1); note(320, .045, .08); }
           if (name === 'warning') { note(97, .28, .07, 0, 85, 'sine'); note(104, .3, .045, .02, 88, 'sine'); }
-        } catch { /* Sound must never interrupt the machine. */ }
+        } catch {   }
       }
 
       const reels = NAMES.map((name, i) => {
@@ -570,7 +568,7 @@
             if (animation.playState === 'running') raf = requestAnimationFrame(tick);
           }
           raf = requestAnimationFrame(tick);
-          try { await animation.finished; } catch { /* A canceled visual still resolves to its selected word. */ }
+          try { await animation.finished; } catch {   }
           cancelAnimationFrame(raf);
           animation.cancel(); r.animation = null;
         } else { await wait(duration); }
@@ -623,13 +621,13 @@
       }
       async function copyText(text) {
         let success = false;
-        try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); success = true; } } catch { /* Fall through to the local-file fallback. */ }
+        try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); success = true; } } catch {   }
         if (!success) {
           const previous = document.activeElement;
           const field = document.createElement('textarea'); field.value = text;
           field.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
           ($('slip').open ? $('slip') : document.body).append(field); field.select();
-          try { success = document.execCommand('copy'); } catch { /* Offer a real manual fallback below. */ }
+          try { success = document.execCommand('copy'); } catch {   }
           field.remove(); previous?.focus({ preventScroll: true });
         }
         if (success) { notify('Copied.'); sound('copy'); return true; }
@@ -704,12 +702,12 @@
       function applyConfig() {
         const root = document.documentElement;
         root.dataset.theme = cfg.light ? 'light' : 'dark'; root.style.setProperty('--accent', cfg.color);
-        // Compare black/white using relative luminance, including custom colors.
+
         const channels = cfg.color.match(/[\da-f]{2}/gi).map(hex => parseInt(hex, 16));
         const luminanceOf = values => values.map(value => value / 255).map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4).reduce((sum, value, i) => sum + value * [.2126, .7152, .0722][i], 0);
         const luminance = luminanceOf(channels);
         root.style.setProperty('--on-accent', luminance > .179 ? '#111111' : '#ffffff');
-        // Keep small accent-colored text readable, even with a near-white/black custom paint.
+
         const backgrounds = cfg.light ? [[238,233,221], [246,242,233]] : [[29,29,25], [37,37,32]];
         const ink = cfg.light ? [41,39,32] : [238,232,217];
         let readable = channels;
@@ -724,7 +722,7 @@
         document.querySelector('.sound-waves').style.opacity = cfg.sound ? '1' : '.2';
         $('theme').setAttribute('aria-pressed', String(!cfg.light)); $('theme').textContent = cfg.light ? 'Off' : 'On';
         $('slips').setAttribute('aria-pressed', String(cfg.popup)); $('slips').textContent = cfg.popup ? 'On' : 'Off';
-        // Do not rewrite an active native picker/slider: that can interrupt dragging or close its UI.
+
         if ($('volume').value !== String(cfg.vol)) $('volume').value = cfg.vol;
         $('volume-value').textContent = `${Math.round(cfg.vol)}%`;
         if ($('color').value.toLowerCase() !== cfg.color) $('color').value = cfg.color;
@@ -761,7 +759,7 @@
         if (event.target.closest('button, input, textarea, select, a, [contenteditable], [role="tab"]')) return;
         event.preventDefault(); run();
       });
-      // Finish an in-flight reel before reflowing to a new row height on resize.
+
       window.addEventListener('resize', () => {
         reels.forEach(r => { if (r.animation?.playState === 'running') r.animation.finish(); });
       });
@@ -769,16 +767,66 @@
         if (document.hidden) { clearTimeout(popupTimer); reels.forEach(r => { if (r.animation?.playState === 'running') r.animation.finish(); }); }
       });
 
-      // The warning/login is deliberately theatrical, not an authentication boundary.
-      // Only browser diagnostics and an explicitly public visitor total are displayed.
       const WARNINGS = [
-        'Are you sure?', 'Very sure?', 'Absolutely sure?', 'Are you really sure?',
-        'You can still leave.', 'Still want to continue?', 'This is your last warning.',
-        'Are you certain?', 'No, really. Are you sure?', 'Open diagnostics?'
+        'Are you sure?', 'Very sure?', 'Really sure?', 'Absolutely sure?', 'Completely sure?',
+        'You’re certain?', 'Still yes?', 'Think about it.', 'Want to turn back?', 'Continue anyway?',
+        'You checked?', 'Double-checked?', 'Triple-checked?', 'No doubts?', 'None at all?',
+        'Not even one?', 'Still going?', 'Positive?', 'Completely positive?', 'Sure about that?',
+        'Another yes?', 'And another?', 'Keep going?', 'Are you certain?', 'Halfway there.',
+        'Still sure?', 'Very, very sure?', 'It’s not too late.', 'Nothing changed?', 'Continue?',
+        'You meant yes?', 'On purpose?', 'No misclick?', 'Your hand didn’t slip?', 'Not an accident?',
+        'Still your answer?', 'No second thoughts?', 'Really no second thoughts?', 'Thought it through?', 'Want to finish this?',
+        'Yes again?', 'Again?', 'Again again?', 'Nearly there.', 'Sure enough to sign in?',
+        'You remember why you’re here?', 'Final checks.', 'Really, truly sure?', 'One last yes?', 'Open diagnostics?'
       ];
-      let warningStage = 0, debugUnlocked = false, debugTimer = null;
+      let warningStage = 0, debugUnlocked = false, debugTimer = null, warningKeyboardMode = false, warningPointerDown = false;
+      let warningDodges = { no: 0, yes: 0 }, warningPositions = null;
       const warningDialog = $('warning-dialog'), debugDialog = $('debug-dialog');
-      function renderWarning() {
+      const warningArena = $('warning-questions'), warningNo = $('warning-cancel'), warningYes = $('warning-next');
+      function placeWarningButtons(avoid = null, moving = null) {
+        if (!warningDialog.open || warningArena.hidden) return;
+        const width = warningArena.clientWidth, height = warningArena.clientHeight;
+        const bw = warningYes.offsetWidth, bh = warningYes.offsetHeight;
+        const maxX = Math.max(0, width - bw), maxY = Math.max(0, height - bh);
+        const still = motion.matches || warningKeyboardMode;
+        warningArena.dataset.still = String(still);
+        const bounds = warningArena.getBoundingClientRect();
+        const point = avoid ? { x: avoid.clientX - bounds.left, y: avoid.clientY - bounds.top } : null;
+        const apart = (a, b) => Math.abs(a.x - b.x) >= bw + 12 || Math.abs(a.y - b.y) >= bh + 12;
+        const clear = p => !point || point.x < p.x - 12 || point.x > p.x + bw + 12 || point.y < p.y - 12 || point.y > p.y + bh + 12;
+        const random = () => ({ x: Math.round(Math.random() * maxX), y: Math.round(Math.random() * maxY) });
+        let next = null;
+        if (still) next = { no: { x: 0, y: Math.round(maxY / 2) }, yes: { x: maxX, y: Math.round(maxY / 2) } };
+        if (!next && moving && warningPositions) {
+          const other = moving === 'yes' ? 'no' : 'yes';
+          for (let tries = 0; tries < 80; tries++) {
+            const p = random();
+            if (apart(p, warningPositions[other]) && clear(p) && Math.hypot(p.x - warningPositions[moving].x, p.y - warningPositions[moving].y) > 28) {
+              next = { ...warningPositions, [moving]: p }; break;
+            }
+          }
+          if (!next) return;
+        }
+        if (!next) {
+          for (let tries = 0; tries < 120; tries++) {
+            const no = random(), yes = random();
+            if (apart(no, yes) && clear(no) && clear(yes)) { next = { no, yes }; break; }
+          }
+        }
+        if (!next) {
+          const slots = [];
+          for (const x of [0, maxX / 2, maxX]) for (const y of [0, maxY / 2, maxY]) slots.push({ x: Math.round(x), y: Math.round(y) });
+          for (const no of slots) {
+            for (const yes of slots) if (apart(no, yes) && clear(no) && clear(yes)) { next = { no, yes }; break; }
+            if (next) break;
+          }
+        }
+        if (!next) next = { no: { x: 0, y: 0 }, yes: { x: maxX, y: maxY } };
+        warningPositions = next;
+        warningNo.style.transform = `translate(${next.no.x}px, ${next.no.y}px)`;
+        warningYes.style.transform = `translate(${next.yes.x}px, ${next.yes.y}px)`;
+      }
+      function renderWarning(event = null) {
         const login = warningStage >= WARNINGS.length;
         $('warning-title').textContent = login ? 'Sign in' : WARNINGS[warningStage];
         $('warning-step').textContent = login ? 'ACCESS' : `${String(warningStage + 1).padStart(2, '0')} / ${WARNINGS.length}`;
@@ -793,18 +841,21 @@
           ghost.style.setProperty('--go', String(.8 - i * .12));
           $('warning-ghosts').append(ghost);
         }
-        animateClass($('warning-content'), 'warning-shift');
+        warningDodges = { no: 0, yes: 0 };
+        animateClass($('warning-title'), 'warning-shift');
+        if (!login) placeWarningButtons(event?.detail > 0 ? event : null);
         if (login) $('debug-user').focus();
       }
-      function openDiagnostics() {
+      function openDiagnostics(event = null) {
         clearTimeout(popupTimer);
         document.body.classList.remove('danger-hover');
         if (debugUnlocked) {
           renderDebug(); debugDialog.showModal();
           debugTimer = setInterval(renderDebug, 1000); refreshVisitors(); return;
         }
-        warningStage = 0; $('debug-login').reset(); $('login-error').textContent = '';
-        renderWarning(); warningDialog.showModal(); sound('warning');
+        warningStage = 0; warningKeyboardMode = event?.detail === 0; warningPointerDown = false; warningPositions = null;
+        $('debug-login').reset(); $('login-error').textContent = '';
+        warningDialog.showModal(); renderWarning(); $('close-warning').focus({ preventScroll: true }); sound('warning');
       }
       $('danger').addEventListener('pointerenter', () => {
         if (!document.querySelector('dialog[open]')) document.body.classList.add('danger-hover');
@@ -815,12 +866,31 @@
       });
       $('danger').addEventListener('blur', () => document.body.classList.remove('danger-hover'));
       $('danger').addEventListener('click', openDiagnostics);
-      $('warning-next').addEventListener('click', () => { warningStage++; renderWarning(); sound('warning'); });
+      $('warning-next').addEventListener('click', event => {
+        if (warningStage >= WARNINGS.length) return;
+        warningStage++; renderWarning(event); sound('warning');
+      });
+      [[warningNo, 'no'], [warningYes, 'yes']].forEach(([button, key]) => {
+        button.addEventListener('pointerenter', event => {
+          if (event.pointerType !== 'mouse' || warningKeyboardMode || motion.matches || warningPointerDown || warningDodges[key] >= 1) return;
+          warningDodges[key]++; placeWarningButtons(event, key);
+        });
+        button.addEventListener('pointerdown', () => { warningPointerDown = true; });
+      });
+      document.addEventListener('pointerup', () => { warningPointerDown = false; });
+      document.addEventListener('pointercancel', () => { warningPointerDown = false; });
+      warningDialog.addEventListener('keydown', event => {
+        if (['Tab', 'Enter', ' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key) && !warningKeyboardMode) {
+          warningKeyboardMode = true; placeWarningButtons();
+        }
+      });
+      window.addEventListener('resize', () => placeWarningButtons());
+      motion.addEventListener('change', () => placeWarningButtons());
       ['close-warning', 'warning-cancel', 'login-cancel'].forEach(id => $(id).addEventListener('click', () => warningDialog.close()));
       warningDialog.addEventListener('close', () => { $('debug-password').value = ''; document.body.classList.remove('danger-hover'); });
       $('debug-login').addEventListener('submit', event => {
         event.preventDefault();
-        // Requested easter-egg credentials. Do not reuse this pattern for private data.
+
         if ($('debug-user').value === 'password' && $('debug-password').value === 'admin') {
           debugUnlocked = true; warningDialog.close(); logEvent('Diagnostics opened'); openDiagnostics();
         } else {
@@ -846,7 +916,7 @@
         const elapsed = Math.floor((performance.now() - startedAt) / 1000);
         $('debug-uptime').textContent = `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`;
         const data = [
-          ['Version', '9003.56'], ['Theme', cfg.light ? 'Light' : 'Dark'], ['Accent', cfg.color],
+          ['Version', '9003.57'], ['Theme', cfg.light ? 'Light' : 'Dark'], ['Accent', cfg.color],
           ['Sound', cfg.sound ? `${cfg.vol}%` : 'Off'], ['Storage', storageAvailable ? 'Available' : 'Session only'],
           ['Reduced motion', motion.matches ? 'On' : 'Off'], ['Viewport', `${innerWidth} × ${innerHeight}`],
           ['Reels', busy ? 'Spinning' : 'Ready'], ['Tracking', analyticsState]
@@ -876,9 +946,9 @@
         if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl === true) { analyticsState = 'Privacy opt-out'; return; }
         const script = document.createElement('script'); script.async = true;
         script.src = 'https://gc.zgo.at/count.js'; script.dataset.goatcounter = `${analyticsOrigin}/count`;
-        // One page-load visit. Do not send spin events, custom words, login fields, or URL queries.
+
         let referrer = '';
-        try { if (document.referrer) referrer = new URL(document.referrer).origin; } catch { /* Invalid referrer: omit it. */ }
+        try { if (document.referrer) referrer = new URL(document.referrer).origin; } catch {   }
         script.referrerPolicy = 'no-referrer';
         script.dataset.goatcounterSettings = JSON.stringify({ path: site.pathname, no_events: true, referrer });
         script.onload = () => { analyticsState = 'Loaded'; logEvent('Analytics script loaded'); };
@@ -898,7 +968,7 @@
           const data = await response.json(), count = String(data.count ?? '').trim();
           if (!/^\d[\d,\s.\u00a0\u202f]*$/.test(count) || count.length > 40) throw new Error('Invalid counter response.');
           $('visitor-count').textContent = count;
-          $('visitor-status').textContent = 'Visits · cached by GoatCounter for up to 4 hours.';
+          $('visitor-status').textContent = 'Loaded · cached';
           logEvent('Visitor count loaded');
         } catch (error) {
           $('visitor-count').textContent = '—';
@@ -913,6 +983,6 @@
       wordCounts(); renderResult(); renderHistory(); persist();
       logEvent('App ready'); initializeAnalytics();
     })();
-  </script>
+</script>
 </body>
 </html>
