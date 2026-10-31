@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOP-O-MATIC</title>
+<style>
+html,body{margin:0;background:#050a05}
+body{color:#33ff66;font-family:"Courier New",monospace;text-shadow:0 0 6px #33ff66;min-height:100vh;padding:16px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.28) 2px 3px)}
+main{max-width:720px;margin:0 auto;text-align:center}
+pre{margin:0 0 16px;font:inherit;font-size:min(2.5vw,18px);line-height:1.2;white-space:pre}
+button{font:inherit;color:#33ff66;background:transparent;border:1px solid #33ff66;padding:6px 12px;cursor:pointer;text-shadow:inherit}
+button:hover,button.on{background:#33ff66;color:#050a05;text-shadow:none}
+button:disabled{outline:2px dashed #33ff66;border-color:transparent;cursor:wait;background:transparent;color:#33ff66;text-shadow:0 0 6px #33ff66}
+.bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+#go{font-size:min(4.5vw,22px);padding:10px 20px;background:#33ff66;color:#050a05;text-shadow:none}
+#go:disabled{background:transparent;color:#33ff66;text-shadow:0 0 6px #33ff66}
+#out{margin:22px 0 14px;font-size:min(6vw,30px);min-height:1.4em}
+.panel{display:none}
+.panel.show{display:block}
+#list{list-style:none;padding:0;margin:0 0 14px;text-align:left}
+#list li{padding:6px 4px;border-bottom:1px dashed #33ff66;cursor:pointer}
+#list li:hover{background:#33ff66;color:#050a05;text-shadow:none}
+.empty{opacity:.6;padding:20px 0}
+.wl{text-align:left}
+.wl label{display:block;margin:10px 0 3px;opacity:.7}
+textarea{display:block;width:100%;height:120px;background:transparent;color:#33ff66;border:1px solid #33ff66;font:inherit;padding:6px;text-shadow:inherit;box-sizing:border-box}
+.btn{display:inline-block;font:inherit;color:#33ff66;border:1px solid #33ff66;padding:6px 12px;text-decoration:none;text-shadow:inherit}
+.btn:hover{background:#33ff66;color:#050a05;text-shadow:none}
+footer{margin-top:44px;padding-top:16px;border-top:1px dashed #33ff66}
+footer .bar{margin-bottom:12px}
+.cr{opacity:.7}
+</style>
+</head>
+<body>
+<main>
+<pre style="font-size:min(2.4vw,16px)">
+ ___ _      ___  ___       ___        __  __   _ _____ ___ ___
+/ __| |    / _ \| _ \ ___ / _ \ ___  |  \/  | /_\_   _|_ _/ __|
+\__ \ |__ | (_) |  _/|___| (_) |___| | |\/| |/ _ \| |  | | (__
+|___/____| \___/|_|        \___/      |_|  |_/_/ \_\_| |___\___|
+</pre>
+<div class="bar">
+  <button class="tab on" data-t="spin">[ SPIN ]</button>
+  <button class="tab" data-t="ideas">[ IDEAS ]</button>
+  <button class="tab" data-t="words">[ WORDS ]</button>
+  <button id="snd">SOUND: OFF</button>
+</div>
+
+<section class="panel show" id="p-spin">
+  <pre id="m"></pre>
+  <button id="go">[ RUN ]</button>
+  <div id="out"></div>
+  <button id="copy">COPY IDEA</button>
+</section>
+
+<section class="panel" id="p-ideas">
+  <ul id="list"></ul>
+  <button id="clear">CLEAR LIST</button>
+  <div style="opacity:.6;margin-top:10px">click an idea to copy it</div>
+</section>
+
+<section class="panel wl" id="p-words">
+  <label>VERBS (one per line)</label><textarea id="t0"></textarea>
+  <label>ARTICLES</label><textarea id="t1"></textarea>
+  <label>NOUNS</label><textarea id="t2"></textarea>
+  <button id="reset" style="margin-top:12px">RESET WORDS</button>
+</section>
+<footer>
+  <div class="bar">
+    <button id="dc">DISCORD</button>
+    <a class="btn" href="https://x.com/dev_lotty" target="_blank" rel="noopener">TWITTER</a>
+  </div>
+  <div class="cr">&copy; 2026 dev_lotty</div>
+</footer>
+</main>
+<script>
+var base=[
+["Become","Eat","Summon","Befriend","Sell","Escape","Fight","Marry","Hack","Adopt","Banish","Worship","Clone","Haunt","Defeat","Ride","Steal","Invent","Cancel","Smuggle"],
+["the","a","our","my","your","every","no","one","some","that","another","their"],
+["Garden","Toaster","Goose","Lawnmower","Haunted Pizza","Dragon","Sock","Mayor","Volcano","Hamster","Skeleton","Wi-Fi","Vending Machine","Cousin","Moon","Wizard","Parking Lot","Pigeon","Raccoon","Lighthouse"]
+];
+function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var words=ld("sw",JSON.parse(JSON.stringify(base))),ideas=ld("si",[]);
+var W=18,cur=["Become","our","Garden"],busy=false,sound=false,AC=null;
+var m=document.getElementById("m"),go=document.getElementById("go"),out=document.getElementById("out");
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function cc(s,w){s=s.slice(0,w);var l=Math.floor((w-s.length)/2);return " ".repeat(l)+s+" ".repeat(w-s.length-l)}
+function sentence(a){var s=a.join(" ").toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1)+"."}
+function show(a){
+  var l="+"+"-".repeat(W)+"+",e=[l,l,l].join(" ");
+  m.textContent=[e,a.map(function(w){return"|"+cc(w.toUpperCase(),W)+"|"}).join(" "),e].join("\n");
+}
+function beep(f,len){
+  if(!sound)return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+  var o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=f;g.gain.value=.05;
+  o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+(len||.08));o.stop(AC.currentTime+(len||.08)+.01)}catch(e){}
+}
+function copy(t,b,label){
+  try{navigator.clipboard.writeText(t)}catch(e){}
+  if(b){b.textContent="COPIED!";setTimeout(function(){b.textContent=label},900)}
+}
+function run(){
+  if(busy)return;busy=true;
+  go.disabled=true;go.textContent="[ CONSULTING THE ALGORITHM... ]";out.textContent="";
+  var now=cur.slice(),left=3;
+  [0,1,2].forEach(function(i){
+    var t=setInterval(function(){now[i]=pick(words[i]);show(now);beep(300+Math.random()*250,.05)},70);
+    setTimeout(function(){
+      clearInterval(t);now[i]=pick(words[i]);show(now);beep(140,.18);
+      if(--left==0){
+        cur=now.slice();busy=false;go.disabled=false;go.textContent="[ RUN ]";
+        var s=sentence(cur);out.textContent="> "+s;
+        ideas.unshift(s);ideas=ideas.slice(0,50);sv("si",ideas);drawList();
+      }
+    },900+i*600);
+  });
+}
+function drawList(){
+  var ul=document.getElementById("list");ul.textContent="";
+  if(!ideas.length){var d=document.createElement("li");d.className="empty";d.textContent="no ideas yet. go spin.";d.style.cursor="default";ul.appendChild(d);return}
+  ideas.forEach(function(s,i){
+    var li=document.createElement("li");li.textContent=("00"+(ideas.length-i)).slice(-2)+"  "+s;
+    li.onclick=function(){copy(s);li.textContent="COPIED!";setTimeout(drawList,700)};
+    ul.appendChild(li);
+  });
+}
+function tab(t){
+  Array.prototype.forEach.call(document.querySelectorAll(".panel"),function(p){p.classList.toggle("show",p.id=="p-"+t)});
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.classList.toggle("on",b.dataset.t==t)});
+  beep(500,.05);
+}
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){tab(b.dataset.t)}});
+for(var q=0;q<3;q++)(function(i){
+  var ta=document.getElementById("t"+i);ta.value=words[i].join("\n");
+  ta.oninput=function(){
+    var a=ta.value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+    words[i]=a.length?a:base[i];sv("sw",words);
+  };
+})(q);
+document.getElementById("reset").onclick=function(){
+  words=JSON.parse(JSON.stringify(base));sv("sw",words);
+  for(var i=0;i<3;i++)document.getElementById("t"+i).value=words[i].join("\n");
+};
+document.getElementById("clear").onclick=function(){ideas=[];sv("si",ideas);drawList()};
+document.getElementById("copy").onclick=function(){copy(sentence(cur),this,"COPY IDEA")};
+document.getElementById("snd").onclick=function(){sound=!sound;this.textContent="SOUND: "+(sound?"ON":"OFF");beep(440,.1)};
+document.getElementById("dc").onclick=function(){copy(".lty_",this,"DISCORD")};
+go.onclick=run;
+document.addEventListener("keydown",function(e){
+  if(e.code=="Space"&&!/TEXTAREA|BUTTON/.test(e.target.tagName)&&document.getElementById("p-spin").classList.contains("show")){e.preventDefault();run()}
+});
+show(cur);drawList();
+</script>
+</body>
+</html>
