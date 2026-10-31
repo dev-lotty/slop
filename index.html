@@ -1,24 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eee9dd">
-  <meta name="description" content="Three words. Occasionally an idea. A questionable little invention by dev_lotty.">
+  <meta name="theme-color" content="#1d1d19">
+  <meta name="description" content="A three-word idea generator by dev_lotty.">
+  <link rel="canonical" href="https://dev-lotty.github.io/slop/">
   <title>slop generator 9003.56</title>
+  <script>
+    try {
+      const saved = JSON.parse(localStorage.getItem('slop:handmade:v1'));
+      document.documentElement.dataset.theme = saved?.appearanceVersion === 2 && saved.cfg?.light === true ? 'light' : 'dark';
+    } catch { document.documentElement.dataset.theme = 'dark'; }
+  </script>
   <style>
     :root {
-      color-scheme: light;
-      --paper: #eee9dd; --surface: #f6f2e9; --ink: #292720; --muted: #6a655a;
-      --line: #c9c2b2; --soft: #e4ded1; --accent: #e45c32; --accent-ink: #ad3e21; --on-accent: #1b1814;
+      color-scheme: dark;
+      --paper: #1d1d19; --surface: #252520; --ink: #eee8d9; --muted: #aaa593;
+      --line: #4d4b40; --soft: #303029; --accent: #e45c32; --accent-ink: #f27c59; --on-accent: #1b1814;
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
       --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
       --row: 64px;
     }
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --paper: #1d1d19; --surface: #252520; --ink: #eee8d9; --muted: #aaa593;
-      --line: #4d4b40; --soft: #303029;
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --paper: #eee9dd; --surface: #f6f2e9; --ink: #292720; --muted: #6a655a;
+      --line: #c9c2b2; --soft: #e4ded1;
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -34,14 +41,10 @@
     button { background: none; border: 0; }
     a { color: inherit; text-underline-offset: 4px; }
     svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
-    .wrap { max-width: 672px; margin: 0 auto; padding: 52px 24px 25px; }
-    .eyebrow { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; letter-spacing: .035em; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-    .heading { position: relative; margin-top: 20px; }
+    .wrap { max-width: 672px; margin: 0 auto; padding: 52px 24px 85px; }
+    .heading { position: relative; margin-top: 0; }
     h1 { margin: 0; font: 700 clamp(44px, 10vw, 76px)/1.04 var(--serif); letter-spacing: -.065em; }
     .version { display: inline-block; margin-left: 9px; vertical-align: middle; transform: rotate(-6deg) translateY(-7px); border: 1px solid var(--accent-ink); border-radius: 48% 43% 46% 42%; padding: 5px 7px; color: var(--accent-ink); font: 10px var(--mono); letter-spacing: -.03em; }
-    .intro { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
-    .intro em { color: var(--ink); font-style: normal; border-bottom: 1px solid var(--line); }
     .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 30px 0 26px; border-bottom: 1px solid var(--line); }
     .tabs { display: flex; gap: 23px; }
     .tab { position: relative; min-height: 42px; padding: 5px 0 14px; color: var(--muted); font-size: 12px; }
@@ -84,14 +87,12 @@
     .spin svg { width: 22px; height: 22px; stroke-width: 1.8; }
     .keyboard-hint { font-size: 10px; line-height: 1.8; color: var(--muted); }
     kbd { border: 1px solid var(--line); border-bottom-width: 2px; padding: 1px 5px; border-radius: 3px; font: 10px var(--mono); }
-    .machine-note { margin: 15px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
     .result { position: relative; margin-top: 34px; padding: 0 1px 24px; border-bottom: 1px dashed var(--line); }
     .result-top { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
     .result-number { font-variant-numeric: tabular-nums; letter-spacing: 0; }
     .idea { margin: 15px 0 12px; min-height: 1.2em; font: 400 clamp(32px, 6.7vw, 45px)/1.13 var(--serif); letter-spacing: -.045em; overflow-wrap: anywhere; }
     .idea.waiting { opacity: .3; }
     .idea.reveal { animation: arrive 320ms both; }
-    .aside { margin: 0; color: var(--muted); font: italic 15px/1.4 var(--serif); }
     .result-bottom { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 22px; }
     .text-button { padding: 8px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line); }
     .text-button:disabled { opacity: .4; }
@@ -146,11 +147,59 @@
     .slip-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 15px; border-bottom: 1px dashed var(--line); font-size: 10px; text-transform: uppercase; }
     .close { min-width: 30px; min-height: 30px; padding: 4px; border: 1px solid var(--line); }
     .slip-idea { margin: 24px 0; font: 34px/1.1 var(--serif); letter-spacing: -.035em; overflow-wrap: anywhere; }
-    .slip-note { margin: 0 0 18px; color: var(--muted); font: italic 15px var(--serif); }
     .slip-actions { display: flex; justify-content: space-between; gap: 15px; border-top: 1px dashed var(--line); padding-top: 12px; }
     .manual-title { margin: 0 0 12px; font-size: 26px; }
     .manual-note { color: var(--muted); font-size: 11px; }
     .manual-copy { min-height: 90px; margin: 16px 0; }
+    input[type="text"], input[type="password"] { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 3px; padding: 9px 11px; background: var(--paper); color: var(--ink); }
+    .danger-button { position: fixed; z-index: 26; bottom: max(18px, env(safe-area-inset-bottom)); right: max(18px, env(safe-area-inset-right)); display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--muted); transition: color 180ms, border-color 180ms, box-shadow 250ms, transform 180ms; }
+    .danger-button svg { width: 23px; height: 23px; }
+    .danger-button:hover, .danger-button:focus-visible { color: #ff685e; border-color: #e64337; background: #241310; box-shadow: 0 0 35px #c3292659, inset 0 0 16px #b72b2633; transform: rotate(-3deg) scale(1.06); }
+    .danger-button::before { content: "DANGER"; position: absolute; right: 0; bottom: 57px; padding: 5px 8px; border: 1px solid #a83730; background: #170b09; color: #ff8a7e; font-size: 10px; letter-spacing: .17em; opacity: 0; transform: translateY(4px); transition: opacity 200ms, transform 200ms; pointer-events: none; }
+    .danger-button:hover::before, .danger-button:focus-visible::before { opacity: 1; transform: none; }
+    .warning-vignette { position: fixed; z-index: 24; inset: 0; background: radial-gradient(ellipse at center, transparent 35%, #8c120d61 100%); opacity: 0; transition: opacity 500ms; pointer-events: none; }
+    body.danger-hover .warning-vignette { opacity: 1; }
+    #warning-dialog { --paper: #100c0b; --surface: #1c1110; --ink: #f4d7d2; --muted: #c89d96; --line: #754039; --accent-ink: #ff9b8b; width: min(420px, calc(100vw - 36px)); padding: 0; overflow: visible; border-color: #c64c40; background: #150e0d; color: #f4d7d2; box-shadow: 0 0 0 5px #1b0d0b, 0 18px 100px #b21e1e45; }
+    #warning-dialog::backdrop { background: radial-gradient(ellipse at center, #1e080b9c, #080404ef); backdrop-filter: blur(4px); }
+    .warning-bar { position: relative; z-index: 2; display: flex; align-items: center; gap: 9px; padding: 11px 16px; border-bottom: 1px solid #754039; background: #321512; color: #ffb4a6; font-size: 10px; letter-spacing: .1em; }
+    .warning-bar svg { width: 15px; height: 15px; }
+    .warning-bar .close { margin-left: auto; color: #f4d7d2; border-color: #92554d; }
+    .warning-content { position: relative; z-index: 1; padding: 30px 25px 24px; background: #150e0d; }
+    .warning-title { font: 400 clamp(28px, 7vw, 39px)/1.15 var(--serif); letter-spacing: -.025em; margin-bottom: 30px; }
+    .warning-actions { display: flex; justify-content: space-between; gap: 15px; }
+    .warning-actions button { min-height: 40px; padding: 8px 17px; border: 1px solid #92554d; border-radius: 2px; background: #231311; color: #f4d7d2; font-size: 12px; }
+    .warning-actions .warning-yes { background: #b73c30; color: #fff; border-color: #f18b7c; }
+    .warning-actions button:hover { border-color: #ffb4a6; }
+    .warning-step { margin-left: auto; font-variant-numeric: tabular-nums; color: #c89d96; }
+    .warning-ghosts { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+    .warning-ghost { position: absolute; inset: 0; border: 1px solid #a1473d; background: #1c0e0c; transform: translate(var(--gx), var(--gy)) rotate(var(--gr)); opacity: var(--go); }
+    .warning-ghost::before { content: "WARNING"; display: block; padding: 9px 12px; font-size: 9px; color: #efa093; border-bottom: 1px solid #70362f; }
+    .warning-shift { animation: warning-shift 230ms ease-out; }
+    .login-field { display: block; margin-bottom: 17px; font-size: 12px; }
+    .login-field input { display: block; margin-top: 6px; }
+    .login-error { min-height: 1.5em; margin: -2px 0 16px; color: #ffb4a6; font-size: 11px; }
+    #debug-dialog { width: min(570px, calc(100vw - 32px)); }
+    .debug-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .debug-header h2 { font-size: 29px; }
+    .debug-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 22px 0; }
+    .debug-stat { min-width: 0; }
+    .debug-stat dt { color: var(--muted); font-size: 10px; }
+    .debug-stat dd { margin: 5px 0 0; font: 30px/1.1 var(--serif); overflow-wrap: anywhere; }
+    .visitor-status { margin: -5px 0 14px; color: var(--muted); font-size: 11px; }
+    .debug-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+    .debug-data { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 20px; font-size: 11px; margin: 20px 0; }
+    .debug-data dt { color: var(--muted); }
+    .debug-data dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+    .debug-log { max-height: 140px; overflow: auto; padding: 12px; border: 1px solid var(--line); border-radius: 3px; font: 10px/1.7 var(--mono); white-space: pre-wrap; background: var(--paper); }
+    .debug-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px; }
+    .debug-note, .setup-details { color: var(--muted); font-size: 10px; }
+    .debug-note { margin: 12px 0 0; }
+    .setup-details { margin: 12px 0; }
+    .setup-details summary { color: var(--ink); cursor: pointer; }
+    .setup-details ol { padding-left: 20px; }
+    .setup-details li { margin: 8px 0; }
+    .setup-details code { overflow-wrap: anywhere; color: var(--ink); }
+    @keyframes warning-shift { from { opacity: .65; transform: translate(-5px, 3px); } to { opacity: 1; transform: none; } }
     .landed { animation: land 300ms; }
     .spark { position: fixed; z-index: 25; width: 4px; height: 7px; border-radius: 1px; pointer-events: none; background: var(--accent); animation: fleck 550ms cubic-bezier(.1,.7,.3,1) forwards; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -158,12 +207,13 @@
     @keyframes arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes count { 45% { transform: translateY(-3px); color: var(--accent-ink); } }
     @keyframes fleck { to { transform: translate(var(--dx), var(--dy)) rotate(var(--turn)); opacity: 0; } }
+    @media (max-width: 760px) {
+      footer { padding-right: 54px; flex-wrap: wrap; }
+    }
     @media (max-width: 480px) {
       :root { --row: 59px; }
-      .wrap { padding: 30px 18px 20px; }
-      .heading { margin-top: 19px; }
-      .version { position: absolute; right: 0; top: -23px; font-size: 8px; margin-left: 0; padding: 4px; transform: rotate(-6deg); }
-      .intro { font-size: 11px; }
+      .wrap { padding: 37px 18px 85px; }
+      .version { position: absolute; right: 0; top: -19px; font-size: 8px; margin-left: 0; padding: 4px; transform: rotate(-6deg); }
       .tabs { gap: 20px; }
       .tab { font-size: 11px; }
       .sound { padding-left: 3px; }
@@ -175,11 +225,12 @@
       .cell { padding-inline: 3px; font-size: clamp(16px, 4.7vw, 22px); }
       .controls { gap: 15px; }
       .spin { min-width: 155px; padding-inline: 16px; }
-      .machine-note { font-size: 9px; }
       .keyboard-hint { font-size: 9px; }
       .result { margin-top: 31px; }
-      footer { gap: 9px; font-size: 9px; }
+      footer { gap: 9px; font-size: 9px; padding-right: 54px; flex-wrap: wrap; }
       .footer-links { gap: 12px; }
+      .warning-content { padding: 25px 19px 21px; }
+      #debug-dialog { padding: 19px; }
     }
     @media (max-width: 340px) {
       .wrap { padding-inline: 12px; }
@@ -195,9 +246,7 @@
 <body>
   <main class="wrap">
     <header>
-      <div class="eyebrow"><span class="dot" aria-hidden="true"></span>a questionable little invention</div>
       <div class="heading"><h1>slop generator<span class="version">9003.56</span></h1></div>
-      <p class="intro">three words. <em>occasionally an idea.</em></p>
     </header>
 
     <div class="nav-row">
@@ -215,91 +264,124 @@
 
     <section id="panel-spin" role="tabpanel" aria-labelledby="tab-spin" tabindex="0">
       <div class="machine" id="machine">
-        <div class="machine-top"><span class="machine-name">the idea machine</span><span class="machine-status" id="machine-status">probably working</span></div>
+        <div class="machine-top"><span class="machine-name">generator</span><span class="machine-status" id="machine-status">ready</span></div>
         <div class="reels" id="reels" role="group" aria-label="Three word reels"></div>
         <div class="controls">
-          <button type="button" class="spin" id="spin"><span id="spin-label">spin it</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10a6 6 0 0 1 0 12H9m0-5-5 5 5 4" transform="translate(0 -3)"/></svg></button>
-          <div class="keyboard-hint"><kbd>space</kbd> works too.<br>no pressure, though.</div>
+          <button type="button" class="spin" id="spin"><span id="spin-label">spin</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></svg></button>
+          <div class="keyboard-hint"><kbd>space</kbd></div>
         </div>
       </div>
-      <p class="machine-note">like a word? hold it. let the rest misbehave.</p>
 
       <div class="result" id="result" aria-busy="false">
-        <div class="result-top"><span id="result-label">a starting point</span><span class="result-number" id="result-number">no. 000</span></div>
+        <div class="result-top"><span id="result-label">result</span><span class="result-number" id="result-number">no. 000</span></div>
         <p class="idea" id="idea">Become our garden.</p>
-        <p class="aside" id="aside">look, it has to start somewhere.</p>
         <div class="result-bottom">
           <button type="button" class="text-button" id="copy">copy idea ↗</button>
-          <span class="counter"><b id="count">0</b> <span id="count-label">ideas out in the world</span></span>
+          <span class="counter"><b id="count">0</b> <span id="count-label">spins</span></span>
         </div>
       </div>
     </section>
 
     <section id="panel-ideas" role="tabpanel" aria-labelledby="tab-ideas" tabindex="0" hidden>
-      <div class="section-header"><h2>the scrap pile.</h2><button type="button" class="text-button" id="clear">clear list</button></div>
-      <p class="section-note">your last 50 attempts. tap one to copy it.</p>
+      <div class="section-header"><h2>Ideas</h2><button type="button" class="text-button" id="clear">Clear</button></div>
+      <p class="section-note">Last 50. Select to copy.</p>
       <ol class="history" id="history" aria-label="Generated ideas"></ol>
-      <div class="empty" id="empty"><p>nothing here yet. that’s probably healthy.</p><button type="button" class="text-button" id="first-spin">make something questionable ↗</button></div>
+      <div class="empty" id="empty"><p>No ideas yet.</p><button type="button" class="text-button" id="first-spin">Spin ↗</button></div>
     </section>
 
     <section id="panel-words" role="tabpanel" aria-labelledby="tab-words" tabindex="0" hidden>
-      <h2>put your own words in.</h2>
-      <p class="section-note">one per line. saved as you type. weirdly specific is good.</p>
+      <h2>Words</h2>
+      <p class="section-note">One per line. Saved automatically.</p>
       <div id="word-fields"></div>
-      <button type="button" class="text-button" id="reset-words">bring back the original words</button>
+      <button type="button" class="text-button" id="reset-words">Reset</button>
     </section>
 
     <section id="panel-style" role="tabpanel" aria-labelledby="tab-style" tabindex="0" hidden>
-      <h2>make yourself at home.</h2>
-      <p class="section-note">same questionable machine. your preferred paint job.</p>
+      <h2>Style</h2>
       <div class="settings-group">
-        <span class="setting-label" id="accent-label">a little color</span>
+        <span class="setting-label" id="accent-label">Accent</span>
         <div class="swatches" id="swatches" role="group" aria-labelledby="accent-label"></div>
-        <label class="custom-color">or something else <input type="color" id="color" value="#e45c32"></label>
+        <label class="custom-color">Custom <input type="color" id="color" value="#e45c32"></label>
       </div>
-      <div class="settings-group setting-row"><div><span id="theme-label">after-dark mode</span><p>for late-night bad ideas, there’s dark mode.</p></div><button type="button" class="toggle" id="theme" aria-labelledby="theme-label" aria-pressed="false">dark: off</button></div>
+      <div class="settings-group setting-row"><span id="theme-label">Dark mode</span><button type="button" class="toggle" id="theme" aria-labelledby="theme-label" aria-pressed="true">On</button></div>
       <div class="settings-group">
-        <label class="setting-label volume-label" for="volume"><span>how loud is this thing?</span><output id="volume-value" for="volume">35%</output></label>
+        <label class="setting-label volume-label" for="volume"><span>Volume</span><output id="volume-value" for="volume">35%</output></label>
         <input type="range" id="volume" min="0" max="100" value="35">
       </div>
-      <div class="settings-group setting-row"><div><span id="slip-label">little result slips</span><p>a popup after each spin. off unless you want it.</p></div><button type="button" class="toggle" id="slips" aria-labelledby="slip-label" aria-pressed="false">off</button></div>
-      <button type="button" class="text-button settings-reset" id="reset-style">back to the original paint job</button>
+      <div class="settings-group setting-row"><span id="slip-label">Result popups</span><button type="button" class="toggle" id="slips" aria-labelledby="slip-label" aria-pressed="false">Off</button></div>
+      <button type="button" class="text-button settings-reset" id="reset-style">Reset</button>
     </section>
 
     <footer>
       <div class="footer-links"><button type="button" class="text-button" id="discord">discord ↗</button><a href="https://x.com/dev_lotty" target="_blank" rel="noopener noreferrer">twitter ↗</a></div>
-      <span class="signature">a little thing by <a href="https://x.com/dev_lotty" target="_blank" rel="noopener noreferrer">dev_lotty</a></span>
+      <span class="signature">© 2026 <a href="https://x.com/dev_lotty" target="_blank" rel="noopener noreferrer">dev_lotty</a></span>
     </footer>
     <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="announcement"></p>
   </main>
 
   <dialog id="slip" aria-labelledby="slip-title" aria-describedby="slip-idea">
-    <div class="slip-top"><span id="slip-title">one freshly made idea</span><button type="button" class="close" id="close-slip" aria-label="Close result slip">×</button></div>
+    <div class="slip-top"><span id="slip-title">Result</span><button type="button" class="close" id="close-slip" aria-label="Close result slip">×</button></div>
     <p class="slip-idea" id="slip-idea"></p>
-    <p class="slip-note">no refunds on the concept.</p>
-    <div class="slip-actions"><button type="button" class="text-button" id="copy-slip">copy idea ↗</button><button type="button" class="text-button" id="again">one more ↗</button></div>
+    <div class="slip-actions"><button type="button" class="text-button" id="copy-slip">Copy ↗</button><button type="button" class="text-button" id="again">Spin again ↗</button></div>
   </dialog>
   <dialog id="manual" aria-labelledby="manual-title">
-    <h2 class="manual-title" id="manual-title">the old-fashioned way.</h2>
-    <p class="manual-note">your browser blocked automatic copying. select this text and copy it instead.</p>
+    <h2 class="manual-title" id="manual-title">Copy text</h2>
+    <p class="manual-note">Automatic copying is blocked. Copy the text below.</p>
     <textarea class="manual-copy" id="manual-text" aria-label="Text to copy" readonly></textarea>
-    <button type="button" class="text-button" id="close-manual">done</button>
+    <button type="button" class="text-button" id="close-manual">Done</button>
+  </dialog>
+  <div class="warning-vignette" aria-hidden="true"></div>
+  <button type="button" class="danger-button" id="danger" aria-label="Warning: open diagnostics" aria-haspopup="dialog">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3v.2"/></svg>
+  </button>
+  <dialog id="warning-dialog" aria-labelledby="warning-title" aria-describedby="warning-step">
+    <div class="warning-ghosts" id="warning-ghosts" aria-hidden="true"></div>
+    <div class="warning-bar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3v.2"/></svg><span id="warning-bar-label">WARNING</span><span class="warning-step" id="warning-step"></span><button type="button" class="close" id="close-warning" aria-label="Close warning">×</button></div>
+    <div class="warning-content" id="warning-content">
+      <h2 class="warning-title" id="warning-title" aria-live="polite" aria-atomic="true">Are you sure?</h2>
+      <div class="warning-actions" id="warning-questions"><button type="button" id="warning-cancel">Cancel</button><button type="button" class="warning-yes" id="warning-next">Yes</button></div>
+      <form id="debug-login" method="dialog" autocomplete="off" hidden>
+        <label class="login-field" for="debug-user">Login<input id="debug-user" name="debug-user" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" required maxlength="80"></label>
+        <label class="login-field" for="debug-password">Password<input id="debug-password" name="debug-password" type="password" autocomplete="off" required maxlength="80"></label>
+        <p class="login-error" id="login-error" role="alert"></p>
+        <div class="warning-actions"><button type="button" id="login-cancel">Cancel</button><button type="submit" class="warning-yes">Sign in</button></div>
+      </form>
+    </div>
+  </dialog>
+  <dialog id="debug-dialog" aria-labelledby="debug-title">
+    <div class="debug-header"><h2 id="debug-title">Diagnostics</h2><button type="button" class="close" id="close-debug" aria-label="Close diagnostics">×</button></div>
+    <dl class="debug-stats">
+      <div class="debug-stat"><dt>Site visits</dt><dd id="visitor-count">—</dd></div>
+      <div class="debug-stat"><dt>Spins · this browser</dt><dd id="debug-spins">0</dd></div>
+      <div class="debug-stat"><dt>Saved ideas</dt><dd id="debug-ideas">0</dd></div>
+      <div class="debug-stat"><dt>Uptime</dt><dd id="debug-uptime">00:00</dd></div>
+    </dl>
+    <p class="visitor-status" id="visitor-status" role="status">Visitor counter not connected.</p>
+    <div class="debug-tools"><button type="button" class="text-button" id="refresh-visitors">Refresh visits</button><button type="button" class="text-button" id="test-sound">Test sound</button><a class="text-button" id="analytics-link" href="https://www.goatcounter.com/" target="_blank" rel="noopener noreferrer" hidden>Analytics ↗</a></div>
+    <dl class="debug-data" id="debug-data"></dl>
+    <pre class="debug-log" id="debug-log" aria-label="Recent debug events"></pre>
+    <details class="setup-details" id="visitor-setup"><summary>Visitor counter setup</summary><ol><li>Create a <a href="https://www.goatcounter.com/signup" target="_blank" rel="noopener noreferrer">GoatCounter account</a> for this site.</li><li>Paste your public <code>https://your-name.goatcounter.com</code> address into <code>ANALYTICS_SITE</code> near the top of the HTML’s main script.</li><li>In GoatCounter settings, enable <strong>Allow adding visitor counts on your website</strong>. The full dashboard can remain private.</li><li>Upload the HTML as <code>index.html</code> in your GitHub repository.</li></ol><p>The total is public data and can be cached for up to four hours. It is not a permanent count of distinct people.</p></details>
+    <div class="debug-footer"><button type="button" class="text-button" id="clear-log">Clear log</button><button type="button" class="text-button" id="lock-debug">Log out</button></div>
+    <p class="debug-note">Easter-egg login, not secure authentication. No private data is stored here.</p>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <script>
     (() => {
       'use strict';
+      // VISITOR SETUP: paste your public GoatCounter address here, then upload this file.
+      // Example: 'https://your-account.goatcounter.com'. Never put an API key/password here.
+      const ANALYTICS_SITE = '';
+      const SITE_URL = 'https://dev-lotty.github.io/slop/';
       const $ = id => document.getElementById(id);
       const BASE = [
         ['Become','Eat','Summon','Befriend','Sell','Escape','Fight','Marry','Hack','Adopt','Banish','Worship','Clone','Haunt','Defeat','Ride','Steal','Invent','Cancel','Smuggle'],
         ['the','a','our','my','your','every','no','one','some','that','another','their'],
         ['Garden','Toaster','Goose','Lawnmower','Haunted Pizza','Dragon','Sock','Mayor','Volcano','Hamster','Skeleton','Wi-Fi','Vending Machine','Cousin','Moon','Wizard','Parking Lot','Pigeon','Raccoon','Lighthouse']
       ];
-      const DEFAULTS = { color: '#e45c32', sound: true, vol: 35, light: true, popup: false };
+      const DEFAULTS = { color: '#e45c32', sound: true, vol: 35, light: false, popup: false };
       const KEY = 'slop:handmade:v1';
       const NAMES = ['verb', 'article', 'noun'];
-      const ASIDES = ['okay. hear me out.', 'there might be something in that.', 'not a plan. more of a situation.', 'someone, somewhere, would play this.', 'probably needs a better business model.', 'you can’t say it isn’t an idea.', 'let it sit for a second.', 'the machine stands by its decision.'];
       const SWATCHES = [['#e45c32','burnt orange'],['#dda52d','mustard'],['#6d9651','garden green'],['#398f91','dusty teal'],['#627cc1','cornflower'],['#a06b9f','mauve'],['#cd6474','rose']];
       const motion = matchMedia('(prefers-reduced-motion: reduce)');
       const cloneBase = () => BASE.map(list => list.slice());
@@ -309,6 +391,12 @@
         return text.charAt(0).toUpperCase() + text.slice(1) + '.';
       };
       let storageAvailable = true;
+      const startedAt = performance.now(), logEntries = [];
+      function logEvent(message) {
+        logEntries.push(`${new Date().toLocaleTimeString([], { hour12: false })}  ${message}`);
+        if (logEntries.length > 12) logEntries.shift();
+        $('debug-log').textContent = logEntries.join('\n');
+      }
       function read(key) {
         try { return JSON.parse(localStorage.getItem(key)); }
         catch { return null; }
@@ -329,7 +417,7 @@
       function cleanConfig(value) {
         const c = value && typeof value === 'object' ? value : {};
         return {
-          color: typeof c.color === 'string' && /^#[\da-f]{6}$/i.test(c.color) ? c.color : DEFAULTS.color,
+          color: typeof c.color === 'string' && /^#[\da-f]{6}$/i.test(c.color) ? c.color.toLowerCase() : DEFAULTS.color,
           sound: typeof c.sound === 'boolean' ? c.sound : DEFAULTS.sound,
           vol: typeof c.vol === 'number' && Number.isFinite(c.vol) ? Math.max(0, Math.min(100, c.vol)) : DEFAULTS.vol,
           light: typeof c.light === 'boolean' ? c.light : DEFAULTS.light,
@@ -337,17 +425,21 @@
         };
       }
       let cfg = cleanConfig(saved.cfg);
+      // Apply the requested dark default once, without losing words/history or later theme choices.
+      if (saved.appearanceVersion !== 2) cfg.light = false;
       const held = [false, false, false];
       let busy = false, activeTab = 'spin', popupTimer, toastTimer, slipText = '';
       function persist() {
-        try { localStorage.setItem(KEY, JSON.stringify({ words, ideas, total, current, cfg })); }
+        try { localStorage.setItem(KEY, JSON.stringify({ appearanceVersion: 2, words, ideas, total, current, cfg })); }
         catch {
-          if (storageAvailable) notify('storage is blocked. changes will last for this visit only.');
+          if (storageAvailable) { notify('Storage unavailable. Changes will last for this visit only.'); logEvent('Browser storage unavailable'); }
           storageAvailable = false;
         }
       }
       function notify(message) {
         clearTimeout(toastTimer);
+        const host = document.querySelector('dialog[open]') || document.body;
+        if ($('toast').parentElement !== host) host.append($('toast'));
         $('toast').textContent = message;
         $('toast').classList.add('visible');
         toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 2600);
@@ -410,6 +502,7 @@
           if (name === 'done') [523.25, 659.25, 783.99].forEach((f, index) => note(f, .22, .06, index * .045));
           if (name === 'copy') { note(740, .07, .08); note(988, .1, .07, .045); }
           if (name === 'hold') { tap(.1); note(320, .045, .08); }
+          if (name === 'warning') { note(97, .28, .07, 0, 85, 'sine'); note(104, .3, .045, .02, 88, 'sine'); }
         } catch { /* Sound must never interrupt the machine. */ }
       }
 
@@ -420,7 +513,7 @@
         const info = { reel, strip: reel.querySelector('.strip'), window: reel.querySelector('.window'), button: reel.querySelector('.hold'), neighbors: [choose(words[i]), choose(words[i])], animation: null };
         info.button.addEventListener('click', () => {
           if (busy) return;
-          if (!held[i] && held.filter(Boolean).length === 2) { notify('leave one word loose. it needs something to do.'); return; }
+          if (!held[i] && held.filter(Boolean).length === 2) { notify('At least one reel must remain unlocked.'); return; }
           held[i] = !held[i]; updateHolds(); sound('hold');
         });
         return info;
@@ -489,33 +582,34 @@
         if (busy) return;
         busy = true; clearTimeout(popupTimer);
         if ($('slip').open) $('slip').close();
-        $('spin').disabled = true; $('spin-label').textContent = 'here goes';
-        $('machine-status').textContent = 'working on it';
+        $('spin').disabled = true; $('spin-label').textContent = 'spinning';
+        $('machine-status').textContent = 'spinning';
         $('result').setAttribute('aria-busy', 'true'); $('idea').classList.add('waiting');
         $('copy').disabled = true; $('announcement').textContent = 'Spinning the word reels.';
         updateHolds(); sound('press');
+        logEvent('Spin started');
         try {
           const moving = [0, 1, 2].filter(i => !held[i]);
           await Promise.all(moving.map((i, order) => spinReel(i, order)));
           const text = sentence(current);
           total++; ideas.unshift(text); ideas = ideas.slice(0, 50);
           persist(); renderResult(); renderHistory();
-          $('aside').textContent = choose(ASIDES);
+          logEvent(`Spin ${total} completed`);
           $('announcement').textContent = `Idea number ${total}. ${text}`;
           animateClass($('idea'), 'reveal'); animateClass($('count'), 'bump');
           if (activeTab === 'spin') { sound('done'); flecks(); }
           if (cfg.popup && activeTab === 'spin' && !document.hidden) popupTimer = setTimeout(() => {
-            if (busy || !cfg.popup || activeTab !== 'spin' || $('manual').open) return;
+            if (busy || !cfg.popup || activeTab !== 'spin' || document.querySelector('dialog[open]')) return;
             slipText = text; $('slip-idea').textContent = text;
             if (!$('slip').open) $('slip').showModal();
           }, 250);
         } catch (error) {
           console.error('The idea machine got stuck:', error);
           reels.forEach((r, i) => { if (r.animation) r.animation.cancel(); rest(i); });
-          renderResult(); notify('a small mechanical disagreement. try again?');
+          renderResult(); notify('Unable to spin. Try again.'); logEvent('Spin failed');
         } finally {
-          busy = false; updateHolds(); $('spin').disabled = false; $('spin-label').textContent = 'spin it';
-          $('machine-status').textContent = 'probably working';
+          busy = false; updateHolds(); $('spin').disabled = false; $('spin-label').textContent = 'spin';
+          $('machine-status').textContent = 'ready';
           $('result').setAttribute('aria-busy', 'false'); $('idea').classList.remove('waiting'); $('copy').disabled = false;
         }
       }
@@ -523,10 +617,9 @@
       function renderResult() {
         $('idea').textContent = sentence(current);
         $('count').textContent = total.toLocaleString();
-        $('count-label').textContent = total === 1 ? 'idea out in the world' : 'ideas out in the world';
-        $('result-label').textContent = total ? 'fresh from the machine' : 'a starting point';
+        $('count-label').textContent = total === 1 ? 'spin' : 'spins';
+        $('result-label').textContent = 'result';
         $('result-number').textContent = `no. ${String(total).padStart(3, '0')}`;
-        $('aside').textContent = total ? 'the machine stands by its decision.' : 'look, it has to start somewhere.';
       }
       async function copyText(text) {
         let success = false;
@@ -539,7 +632,7 @@
           try { success = document.execCommand('copy'); } catch { /* Offer a real manual fallback below. */ }
           field.remove(); previous?.focus({ preventScroll: true });
         }
-        if (success) { notify('copied. go make something of it.'); sound('copy'); return true; }
+        if (success) { notify('Copied.'); sound('copy'); return true; }
         clearTimeout(popupTimer);
         if ($('slip').open) $('slip').close();
         $('manual-text').value = text;
@@ -584,28 +677,28 @@
 
       const fields = NAMES.map((name, i) => {
         const wrapper = document.createElement('div'); wrapper.className = 'word-field';
-        wrapper.innerHTML = `<div class="field-title"><label for="words-${i}">${name === 'article' ? 'articles' : name + 's'}</label><span class="word-count" id="words-count-${i}"></span></div><textarea id="words-${i}" spellcheck="false" aria-describedby="words-help-${i}" maxlength="20000"></textarea><p class="field-help" id="words-help-${i}">up to 200 words, 64 characters each. blank uses the originals.</p>`;
+        wrapper.innerHTML = `<div class="field-title"><label for="words-${i}">${name === 'article' ? 'articles' : name + 's'}</label><span class="word-count" id="words-count-${i}"></span></div><textarea id="words-${i}" spellcheck="false" aria-describedby="words-help-${i}" maxlength="20000"></textarea><p class="sr-only" id="words-help-${i}">Up to 200 words, 64 characters each. Blank uses the defaults.</p>`;
         $('word-fields').append(wrapper);
         const input = $(`words-${i}`); input.value = words[i].join('\n');
         input.addEventListener('input', () => {
           const entries = input.value.split('\n').map(s => s.trim().slice(0, 64)).filter(Boolean).slice(0, 200);
           words[i] = entries.length ? entries : BASE[i].slice();
-          $(`words-count-${i}`).textContent = `${words[i].length} ${entries.length ? 'in the mix' : 'originals (fallback)'}`;
+          $(`words-count-${i}`).textContent = `${words[i].length}${entries.length ? '' : ' (default)'}`;
           persist();
         });
         return input;
       });
-      function wordCounts() { words.forEach((list, i) => $(`words-count-${i}`).textContent = `${list.length} in the mix`); }
+      function wordCounts() { words.forEach((list, i) => $(`words-count-${i}`).textContent = list.length); }
       $('reset-words').addEventListener('click', () => {
         words = cloneBase(); fields.forEach((field, i) => field.value = words[i].join('\n'));
-        wordCounts(); persist(); sound('hold'); notify('the original weirdness is back.');
+        wordCounts(); persist(); sound('hold'); notify('Words reset.'); logEvent('Words reset');
       });
 
       SWATCHES.forEach(([color, name]) => {
         const swatch = document.createElement('button'); swatch.type = 'button'; swatch.className = 'swatch';
         swatch.style.setProperty('--swatch', color); swatch.dataset.color = color;
         swatch.title = name; swatch.setAttribute('aria-label', name); swatch.setAttribute('aria-pressed', 'false');
-        swatch.addEventListener('click', () => { cfg.color = color; applyConfig(); persist(); sound('hold'); });
+        swatch.addEventListener('click', () => { cfg.color = color; applyConfig(); persist(); sound('hold'); logEvent(`Accent: ${color}`); });
         $('swatches').append(swatch);
       });
       function applyConfig() {
@@ -629,39 +722,42 @@
         $('sound-label').textContent = cfg.sound ? 'sound on' : 'sound off';
         $('sound').setAttribute('aria-pressed', String(cfg.sound));
         document.querySelector('.sound-waves').style.opacity = cfg.sound ? '1' : '.2';
-        $('theme').setAttribute('aria-pressed', String(!cfg.light)); $('theme').textContent = cfg.light ? 'dark: off' : 'dark: on';
-        $('slips').setAttribute('aria-pressed', String(cfg.popup)); $('slips').textContent = cfg.popup ? 'on' : 'off';
-        $('volume').value = cfg.vol; $('volume-value').textContent = `${Math.round(cfg.vol)}%`; $('color').value = cfg.color;
+        $('theme').setAttribute('aria-pressed', String(!cfg.light)); $('theme').textContent = cfg.light ? 'Off' : 'On';
+        $('slips').setAttribute('aria-pressed', String(cfg.popup)); $('slips').textContent = cfg.popup ? 'On' : 'Off';
+        // Do not rewrite an active native picker/slider: that can interrupt dragging or close its UI.
+        if ($('volume').value !== String(cfg.vol)) $('volume').value = cfg.vol;
+        $('volume-value').textContent = `${Math.round(cfg.vol)}%`;
+        if ($('color').value.toLowerCase() !== cfg.color) $('color').value = cfg.color;
         document.querySelectorAll('.swatch').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.color === cfg.color)));
         document.querySelector('meta[name="theme-color"]').content = cfg.light ? '#eee9dd' : '#1d1d19';
         if (master) master.gain.setTargetAtTime(cfg.sound ? cfg.vol / 100 : 0, context.currentTime, .015);
       }
-      $('sound').addEventListener('click', () => { cfg.sound = !cfg.sound; applyConfig(); persist(); sound('hold'); });
-      $('theme').addEventListener('click', () => { cfg.light = !cfg.light; applyConfig(); persist(); sound('hold'); });
+      $('sound').addEventListener('click', () => { cfg.sound = !cfg.sound; applyConfig(); persist(); sound('hold'); logEvent(`Sound: ${cfg.sound ? 'on' : 'off'}`); });
+      $('theme').addEventListener('click', () => { cfg.light = !cfg.light; applyConfig(); persist(); sound('hold'); logEvent(`Theme: ${cfg.light ? 'light' : 'dark'}`); });
       $('slips').addEventListener('click', () => {
         cfg.popup = !cfg.popup; clearTimeout(popupTimer); applyConfig(); persist(); sound('hold');
       });
-      $('color').addEventListener('input', event => { cfg.color = event.target.value; applyConfig(); persist(); });
+      $('color').addEventListener('input', event => { cfg.color = event.target.value.toLowerCase(); applyConfig(); persist(); });
       $('volume').addEventListener('input', event => { cfg.vol = Number(event.target.value); applyConfig(); persist(); });
       $('volume').addEventListener('change', () => sound('copy'));
       $('reset-style').addEventListener('click', () => {
-        cfg = { ...DEFAULTS }; clearTimeout(popupTimer); applyConfig(); persist(); sound('hold'); notify('back to the factory paint.');
+        cfg = { ...DEFAULTS }; clearTimeout(popupTimer); applyConfig(); persist(); sound('hold'); notify('Style reset.'); logEvent('Style reset');
       });
       $('clear').addEventListener('click', () => {
         const removed = ideas; ideas = []; persist(); renderHistory();
         $('announcement').textContent = `${removed.length} ideas cleared. Lifetime spin count kept.`;
-        notify('scrap pile cleared. the spin count stays.'); $('first-spin').focus();
+        notify('History cleared.'); logEvent('History cleared'); $('first-spin').focus();
       });
       $('spin').addEventListener('click', run);
       $('first-spin').addEventListener('click', () => { selectTab('spin'); $('spin').focus(); run(); });
       $('copy').addEventListener('click', () => copyText(sentence(current)));
-      $('discord').addEventListener('click', async () => { if (await copyText('.lty_')) notify('discord username copied: .lty_'); });
+      $('discord').addEventListener('click', async () => { if (await copyText('.lty_')) notify('Copied: .lty_'); });
       $('close-slip').addEventListener('click', () => $('slip').close());
       $('copy-slip').addEventListener('click', () => copyText(slipText));
       $('again').addEventListener('click', () => { $('slip').close(); run(); });
       $('close-manual').addEventListener('click', () => $('manual').close());
       document.addEventListener('keydown', event => {
-        if (event.code !== 'Space' || event.repeat || event.ctrlKey || event.metaKey || event.altKey || busy || activeTab !== 'spin' || $('slip').open || $('manual').open) return;
+        if (event.code !== 'Space' || event.repeat || event.ctrlKey || event.metaKey || event.altKey || busy || activeTab !== 'spin' || document.querySelector('dialog[open]')) return;
         if (event.target.closest('button, input, textarea, select, a, [contenteditable], [role="tab"]')) return;
         event.preventDefault(); run();
       });
@@ -672,8 +768,150 @@
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) { clearTimeout(popupTimer); reels.forEach(r => { if (r.animation?.playState === 'running') r.animation.finish(); }); }
       });
+
+      // The warning/login is deliberately theatrical, not an authentication boundary.
+      // Only browser diagnostics and an explicitly public visitor total are displayed.
+      const WARNINGS = [
+        'Are you sure?', 'Very sure?', 'Absolutely sure?', 'Are you really sure?',
+        'You can still leave.', 'Still want to continue?', 'This is your last warning.',
+        'Are you certain?', 'No, really. Are you sure?', 'Open diagnostics?'
+      ];
+      let warningStage = 0, debugUnlocked = false, debugTimer = null;
+      const warningDialog = $('warning-dialog'), debugDialog = $('debug-dialog');
+      function renderWarning() {
+        const login = warningStage >= WARNINGS.length;
+        $('warning-title').textContent = login ? 'Sign in' : WARNINGS[warningStage];
+        $('warning-step').textContent = login ? 'ACCESS' : `${String(warningStage + 1).padStart(2, '0')} / ${WARNINGS.length}`;
+        $('warning-bar-label').textContent = login ? 'DIAGNOSTICS' : 'WARNING';
+        $('warning-questions').hidden = login; $('debug-login').hidden = !login;
+        $('warning-ghosts').replaceChildren();
+        for (let i = Math.min(warningStage, 4); i > 0; i--) {
+          const ghost = document.createElement('div'); ghost.className = 'warning-ghost';
+          ghost.style.setProperty('--gx', `${i * 3 * (i % 2 ? 1 : -1)}px`);
+          ghost.style.setProperty('--gy', `${i * 3}px`);
+          ghost.style.setProperty('--gr', `${i % 2 ? -.6 : .6}deg`);
+          ghost.style.setProperty('--go', String(.8 - i * .12));
+          $('warning-ghosts').append(ghost);
+        }
+        animateClass($('warning-content'), 'warning-shift');
+        if (login) $('debug-user').focus();
+      }
+      function openDiagnostics() {
+        clearTimeout(popupTimer);
+        document.body.classList.remove('danger-hover');
+        if (debugUnlocked) {
+          renderDebug(); debugDialog.showModal();
+          debugTimer = setInterval(renderDebug, 1000); refreshVisitors(); return;
+        }
+        warningStage = 0; $('debug-login').reset(); $('login-error').textContent = '';
+        renderWarning(); warningDialog.showModal(); sound('warning');
+      }
+      $('danger').addEventListener('pointerenter', () => {
+        if (!document.querySelector('dialog[open]')) document.body.classList.add('danger-hover');
+      });
+      $('danger').addEventListener('pointerleave', () => document.body.classList.remove('danger-hover'));
+      $('danger').addEventListener('focus', () => {
+        if ($('danger').matches(':focus-visible') && !document.querySelector('dialog[open]')) document.body.classList.add('danger-hover');
+      });
+      $('danger').addEventListener('blur', () => document.body.classList.remove('danger-hover'));
+      $('danger').addEventListener('click', openDiagnostics);
+      $('warning-next').addEventListener('click', () => { warningStage++; renderWarning(); sound('warning'); });
+      ['close-warning', 'warning-cancel', 'login-cancel'].forEach(id => $(id).addEventListener('click', () => warningDialog.close()));
+      warningDialog.addEventListener('close', () => { $('debug-password').value = ''; document.body.classList.remove('danger-hover'); });
+      $('debug-login').addEventListener('submit', event => {
+        event.preventDefault();
+        // Requested easter-egg credentials. Do not reuse this pattern for private data.
+        if ($('debug-user').value === 'password' && $('debug-password').value === 'admin') {
+          debugUnlocked = true; warningDialog.close(); logEvent('Diagnostics opened'); openDiagnostics();
+        } else {
+          $('login-error').textContent = 'Incorrect login or password.';
+          $('debug-password').value = ''; $('debug-password').focus(); logEvent('Diagnostic login failed');
+        }
+      });
+      $('close-debug').addEventListener('click', () => debugDialog.close());
+      $('lock-debug').addEventListener('click', () => { debugUnlocked = false; debugDialog.close(); logEvent('Diagnostics locked'); });
+      debugDialog.addEventListener('close', () => {
+        clearInterval(debugTimer); debugTimer = null;
+        if (visitorRequest) visitorRequest.abort();
+        document.body.classList.remove('danger-hover');
+      });
+      $('test-sound').addEventListener('click', () => {
+        if (!cfg.sound || !cfg.vol) notify('Sound is off.');
+        else sound('copy');
+        logEvent('Sound test');
+      });
+      $('clear-log').addEventListener('click', () => { logEntries.length = 0; $('debug-log').textContent = ''; });
+      function renderDebug() {
+        $('debug-spins').textContent = total.toLocaleString(); $('debug-ideas').textContent = ideas.length;
+        const elapsed = Math.floor((performance.now() - startedAt) / 1000);
+        $('debug-uptime').textContent = `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`;
+        const data = [
+          ['Version', '9003.56'], ['Theme', cfg.light ? 'Light' : 'Dark'], ['Accent', cfg.color],
+          ['Sound', cfg.sound ? `${cfg.vol}%` : 'Off'], ['Storage', storageAvailable ? 'Available' : 'Session only'],
+          ['Reduced motion', motion.matches ? 'On' : 'Off'], ['Viewport', `${innerWidth} × ${innerHeight}`],
+          ['Reels', busy ? 'Spinning' : 'Ready'], ['Tracking', analyticsState]
+        ];
+        $('debug-data').replaceChildren();
+        data.forEach(([name, value]) => {
+          const term = document.createElement('dt'), detail = document.createElement('dd');
+          term.textContent = name; detail.textContent = value; $('debug-data').append(term, detail);
+        });
+      }
+
+      function analyticsAddress(value) {
+        if (!value || typeof value !== 'string') return '';
+        try {
+          const url = new URL(value.trim().includes('://') ? value.trim() : `https://${value.trim()}`);
+          if (url.protocol !== 'https:' || !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.goatcounter\.com$/i.test(url.hostname) || url.port || url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname)) return '';
+          return url.origin;
+        } catch { return ''; }
+      }
+      const analyticsOrigin = analyticsAddress(ANALYTICS_SITE);
+      let analyticsState = analyticsOrigin ? 'Not loaded' : 'Not configured', visitorRequest = null;
+      function initializeAnalytics() {
+        if (!analyticsOrigin) return;
+        $('analytics-link').href = analyticsOrigin; $('analytics-link').hidden = false;
+        const site = new URL(SITE_URL);
+        if (location.hostname !== site.hostname || !location.pathname.startsWith(site.pathname)) { analyticsState = 'Local / preview'; return; }
+        if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl === true) { analyticsState = 'Privacy opt-out'; return; }
+        const script = document.createElement('script'); script.async = true;
+        script.src = 'https://gc.zgo.at/count.js'; script.dataset.goatcounter = `${analyticsOrigin}/count`;
+        // One page-load visit. Do not send spin events, custom words, login fields, or URL queries.
+        let referrer = '';
+        try { if (document.referrer) referrer = new URL(document.referrer).origin; } catch { /* Invalid referrer: omit it. */ }
+        script.referrerPolicy = 'no-referrer';
+        script.dataset.goatcounterSettings = JSON.stringify({ path: site.pathname, no_events: true, referrer });
+        script.onload = () => { analyticsState = 'Loaded'; logEvent('Analytics script loaded'); };
+        script.onerror = () => { analyticsState = 'Blocked / unavailable'; logEvent('Analytics script unavailable'); };
+        document.head.append(script);
+      }
+      async function refreshVisitors() {
+        if (visitorRequest) return;
+        if (!analyticsOrigin) { $('visitor-count').textContent = '—'; $('visitor-status').textContent = 'Visitor counter not connected.'; return; }
+        const controller = new AbortController(); visitorRequest = controller;
+        $('refresh-visitors').disabled = true; $('visitor-status').textContent = 'Loading visits…';
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        try {
+          const path = encodeURIComponent(new URL(SITE_URL).pathname);
+          const response = await fetch(`${analyticsOrigin}/counter/${path}.json`, { signal: controller.signal, credentials: 'omit', referrerPolicy: 'no-referrer' });
+          if (!response.ok) throw new Error(response.status === 404 ? 'No count available yet.' : response.status === 403 ? 'Enable public visitor counts in GoatCounter settings.' : 'Visitor count unavailable.');
+          const data = await response.json(), count = String(data.count ?? '').trim();
+          if (!/^\d[\d,\s.\u00a0\u202f]*$/.test(count) || count.length > 40) throw new Error('Invalid counter response.');
+          $('visitor-count').textContent = count;
+          $('visitor-status').textContent = 'Visits · cached by GoatCounter for up to 4 hours.';
+          logEvent('Visitor count loaded');
+        } catch (error) {
+          $('visitor-count').textContent = '—';
+          $('visitor-status').textContent = error.name === 'AbortError' ? 'Request stopped. Refresh to try again.' : error.message === 'Failed to fetch' ? 'Visitor count blocked or unavailable.' : error.message;
+          logEvent('Visitor count unavailable');
+        } finally {
+          clearTimeout(timeout); visitorRequest = null; $('refresh-visitors').disabled = false;
+        }
+      }
+      $('refresh-visitors').addEventListener('click', refreshVisitors);
       applyConfig(); reels.forEach((_, i) => rest(i)); updateHolds();
       wordCounts(); renderResult(); renderHistory(); persist();
+      logEvent('App ready'); initializeAnalytics();
     })();
   </script>
 </body>
